@@ -1,0 +1,76 @@
+<!-- <div class="modal-header">
+  <h5 class="modal-title">Remarks for Activity ID: {{ activityId }}</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
+</div> -->
+
+
+
+
+
+<!-- <div class="modal-header">
+  <h5 class="modal-title">
+    Remarks for 
+    <strong>{{ remarksList[0]?.activity?.actName || 'N/A' }}</strong>
+    (Project: <strong>{{ remarksList[0]?.activity?.project?.projName || 'N/A' }}</strong>)
+    [ID: {{ remarksList[0]?.activity?.actId || 'N/A' }}]
+  </h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
+</div>
+
+<div class="modal-body">
+  <table class="table table-bordered table-striped table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>#</th>
+        <th>Remarks</th>
+        <th>Created By</th>
+        <th>Created At</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let remark of remarksList; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ remark.remarks }}</td>
+        <td>{{ remark.createdBy }}</td>
+        <td>{{ remark.createdAt | date:'medium' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="activeModal.close()">Close</button>
+</div> -->
+
+
+<div class="modal-header">
+  <h5 class="modal-title">
+    Remarks for 
+    <strong>{{ remarksList[0]?.activity?.actName || 'N/A' }}</strong>
+    (Project: <strong>{{ remarksList[0]?.activity?.project?.projName || 'N/A' }}</strong>)
+    [ID: {{ remarksList[0]?.activity?.actId || 'N/A' }}]
+  </h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
+</div>
+
+<div class="modal-body remarks-chat-container">
+  <div *ngIf="remarksList.length === 0" class="text-center text-muted">No remarks available.</div>
+
+  <div *ngFor="let remark of remarksList" class="chat-bubble">
+    <div class="bubble-header">
+      <strong>{{ remark.createdBy }}</strong> 
+      <span class="text-muted small ms-2">{{ remark.createdAt | date: 'short' }}</span>
+    </div>
+    <div class="bubble-body">
+      {{ remark.remarks }}
+    </div>
+  </div>
+</div>
+
+<div class="modal-footer d-flex justify-content-between align-items-center">
+  <input type="text" [(ngModel)]="newRemarkText" placeholder="Type a remark..." class="form-control me-2" />
+  <button class="btn btn-primary" (click)="submitRemark()">
+    <i class="fa fa-paper-plane"></i>
+  </button>
+</div>
+

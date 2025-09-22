@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Master</title>
+    <style>
+        .performance-dashboard {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .circular-progress {
+            position: relative;
+            height: 100px;
+            width: 100px;
+        }
+        
+        .circular-progress svg {
+            height: 100px;
+            width: 100px;
+            transform: rotate(-90deg);
+        }
+        
+        .circular-progress circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+        
+        .circular-progress circle:first-child {
+            stroke: #e6e6e6;
+        }
+        
+        .circular-progress circle:last-child {
+            stroke-dasharray: 283;
+            stroke-dashoffset: calc(283 - (var(--percentage) * 283 / 100));
+            transition: stroke-dashoffset 0.5s ease;
+        }
+        
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        
+        .progress-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .progress-label {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .stats-container {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .stat-box {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        .table-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0 fw-bold"><i class="fas fa-tasks me-2"></i>Activity Master</h3>
+            </div>
+
+            <div class="card-body">
+                <!-- Activity Form -->
+                <div class="card mb-4 border-primary" *ngIf="showForm">
+                    <div class="card-header bg-light-primary">
+                        <h5 class="mb-0">{{ selectedActivity ? 'Edit Activity' : 'Create New Activity' }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <form [formGroup]="activityForm" (ngSubmit)="submitForm()">
+                            <div class="row g-3">
+                                <div class="col-md-2">
+                                    <label class="form-label small text-muted">Activity ID</label>
+                                    <input type="number" class="form-control" formControlName="actId" 
+                                        [readonly]="!!selectedActivity" [class.is-valid]="activityForm.get('actId')?.valid">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label small text-muted">Activity Name</label>
+                                    <input type="text" class="form-control" formControlName="actName"
+                                        [class.is-invalid]="activityForm.get('actName')?.invalid && activityForm.get('actName')?.touched">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label small text-muted">Description</label>
+                                    <input type="text" class="form-control" formControlName="actDesc">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label small text-muted">Status</label>
+                                    <select class="form-select" formControlName="status">
+                                        <option [ngValue]="true">Active</option>
+                                        <option [ngValue]="false">Inactive</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4" [formGroupName]="'project'">
+                                    <label class="form-label small text-muted">Project</label>
+                                    <select class="form-select" formControlName="projId">
+                                        <option value="">Select Project</option>
+                                        <option *ngFor="let project of projects" [value]="project.projId">{{ project.projName }}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Button Row -->
+                            <div class="row mt-4">
+                                <div class="col-12 d-flex justify-content-end gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>{{ selectedActivity ? 'Update' : 'Create' }}
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" (click)="resetForm()">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Activities Table Header with Create Button -->
+                <div class="table-header-row">
+                    <h5 class="mb-0">Activity List</h5>
+                    <button class="btn btn-success" (click)="openCreateForm()">
+                        <i class="fas fa-plus-circle me-2"></i>Create New Activity
+                    </button>
+                </div>
+
+                <!-- Activities Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="fw-bold">ID</th>
+                                <th class="fw-bold">Name</th>
+                                <th class="fw-bold">Description</th>
+                                <th class="fw-bold">Status</th>
+                                <th class="fw-bold">Project</th>
+                                <th class="fw-bold text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let activity of activities" (dblclick)="onEdit(activity)" 
+                                class="cursor-pointer">
+                                <td class="text-muted">{{ activity.actId }}</td>
+                                <td class="fw-semibold">{{ activity.actName }}</td>
+                                <td>{{ activity.actDesc }}</td>
+                                <td>
+                                    <span class="badge" 
+                                        [ngClass]="activity.status ? 'bg-success' : 'bg-danger'">
+                                        {{ activity.status ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        {{ activity.project?.projName || 'N/A' }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-primary me-1" 
+                                        (click)="viewSubActivities(activity.actId)">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" 
+                                        (click)="deleteActivity(activity.actId)">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div *ngIf="activities.length === 0" class="text-center py-5 bg-light rounded">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No activities found. Create one to get started!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SubActivity Modal -->
+    <div class="modal fade" id="subActivityModal" tabindex="-1" aria-labelledby="subActivityModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="subActivityModalLabel">
+                        <i class="fas fa-list me-2"></i>Function Points for Activity ID: {{ selectedActivityId }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Performance Dashboard -->
+                    <div class="performance-dashboard" *ngIf="performanceData">
+                        <div class="circular-progress" [style.--percentage]="performanceData.weightagePercentage">
+                            <svg>
+                                <circle r="45" cx="50" cy="50"></circle>
+                                <circle r="45" cx="50" cy="50" 
+                                    [style.stroke]="getProgressColor(performanceData.weightagePercentage)"></circle>
+                            </svg>
+                            <div class="progress-text">
+                                <div class="progress-value">{{ performanceData.weightagePercentage }}%</div>
+                                <div class="progress-label">Completed</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stats-container">
+                            <div class="stat-box">
+                                <div class="stat-value">{{ performanceData.totalSubActivities }}</div>
+                                <div class="stat-label">Total Function Points</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">{{ performanceData.completedSubActivities }}</div>
+                                <div class="stat-label">Completed</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">{{ performanceData.totalSubActivities - performanceData.completedSubActivities }}</div>
+                                <div class="stat-label">Pending</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add SubActivity Button -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0">Function point List</h6>
+                        <button class="btn btn-sm btn-success" (click)="showSubActivityForm()">
+                            <i class="fas fa-plus-circle me-1"></i>Add Function Point
+                        </button>
+                    </div>
+
+                    <!-- SubActivity Form -->
+                    <div class="subactivity-form-container" *ngIf="showSubActivityFormFlag">
+                        <h6 class="mb-3"><i class="fas fa-plus-circle me-2"></i>{{ selectedSubActivity ? 'Edit SubActivity' : 'Create New SubActivity' }}</h6>
+                        <form [formGroup]="subActivityForm" (ngSubmit)="submitSubActivityForm()">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label small text-muted">Function Points Name</label>
+                                    <input type="text" class="form-control" formControlName="subActName" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small text-muted">Description</label>
+                                    <input type="text" class="form-control" formControlName="subActDesc">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small text-muted">Status</label>
+                                    <select class="form-select" formControlName="status">
+                                        <option value="PENDING">Pending</option>
+                                        <option value="IN_PROGRESS">In Progress</option>
+                                        <option value="COMPLETED">Completed</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small text-muted">Start Date</label>
+                                    <input type="datetime-local" class="form-control" formControlName="startDate">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small text-muted">End Date</label>
+                                    <input type="datetime-local" class="form-control" formControlName="endDate">
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12 d-flex justify-content-end gap-2">
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-save me-1"></i>{{ selectedSubActivity ? 'Update' : 'Create' }}
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelSubActivityForm()">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- SubActivities Table -->
+                    <div *ngIf="subActivities.length === 0 && !showSubActivityFormFlag" class="text-center py-4">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No subactivities found for this activity.</p>
+                    </div>
+                    
+                    <div *ngIf="subActivities.length > 0" class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="fw-bold">ID</th>
+                                    <th class="fw-bold">Function Points Name</th>
+                                    <th class="fw-bold">Description</th>
+                                    <th class="fw-bold">Status</th>
+                                    <th class="fw-bold">Start Date</th>
+                                    <th class="fw-bold">End Date</th>
+                                    <th class="fw-bold">Created By</th>
+                                    <th class="fw-bold">Created At</th>
+                                    <th class="fw-bold text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let subActivity of subActivities" (dblclick)="onEditSubActivity(subActivity)" class="cursor-pointer">
+                                    <td class="text-muted">{{ subActivity.subActId }}</td>
+                                    <td class="fw-semibold">{{ subActivity.subActName }}</td>
+                                    <td>{{ subActivity.subActDesc }}</td>
+                                    <td>
+                                        <span class="badge" 
+                                            [ngClass]="{
+                                                'bg-secondary': subActivity.status === 'PENDING',
+                                                'bg-warning': subActivity.status === 'IN_PROGRESS',
+                                                'bg-success': subActivity.status === 'COMPLETED'
+                                            }">
+                                            {{ subActivity.status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ formatDate(subActivity.startDate) }}</td>
+                                    <td>{{ formatDate(subActivity.endDate) }}</td>
+                                    <td>{{ subActivity.createdBy }}</td>
+                                    <td>{{ formatDate(subActivity.createdAt) }}</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-danger" 
+                                                (click)="deleteSubActivity(subActivity.subActId)">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

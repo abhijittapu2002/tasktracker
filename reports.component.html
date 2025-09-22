@@ -1,0 +1,375 @@
+<div class="container-fluid py-4">
+  <div class="card shadow-lg border-0">
+    <div class="card-header bg-gradient-primary text-white">
+      <h3 class="mb-0 fw-bold"><i class="fas fa-chart-bar me-2"></i>Project Analytics & Reports</h3>
+    </div>
+
+    <div class="card-body">
+      <!-- Project Selection -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold text-dark-blue">Select Project</label>
+          <select class="form-select form-select-lg shadow-sm" (change)="onProjectChange($event)">
+            <option value="">-- Select a Project --</option>
+            <option *ngFor="let project of projects" [value]="project.projId">
+              {{ project.projName }} 
+            </option>
+          </select>
+        </div>
+        
+        <div class="col-md-6 d-flex align-items-end">
+          <div *ngIf="selectedProject" class="alert alert-primary mb-0 w-100 py-3 d-flex align-items-center shadow-sm">
+            <i class="fas fa-info-circle me-2 fs-5"></i>
+            <div>
+              Selected: <strong>{{ selectedProject.projName }}</strong>
+              <span class="badge bg-dark-blue ms-2">{{ filteredActivities.length }} activities</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activities Report -->
+      <div *ngIf="selectedProject">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5 class="mb-0 text-dark-blue">Activities for {{ selectedProject.projName }}</h5>
+        </div>
+
+        <div class="table-responsive rounded-3 shadow-sm">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark-blue text-white">
+              <tr>
+                <th class="fw-bold ps-4">Activity ID</th>
+                <th class="fw-bold">Name</th>
+                <th class="fw-bold">Description</th>
+                <th class="fw-bold">Status</th>
+                <th class="fw-bold text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let activity of filteredActivities" class="border-bottom">
+                <td class="text-muted ps-4">{{ activity.actId }}</td>
+                <td class="fw-semibold text-dark-blue">{{ activity.actName }}</td>
+                <td class="text-truncate" style="max-width: 250px;">{{ activity.actDesc }}</td>
+                <td>
+                  <span class="badge rounded-pill p-2" [ngClass]="activity.status ? 'bg-success' : 'bg-secondary'">
+                    {{ activity.status ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-primary me-1 rounded-pill px-3" (click)="viewActivityDetails(activity)">
+                    <i class="fas fa-eye me-1"></i> Details
+                  </button>
+                  <button class="btn btn-sm btn-outline-info me-1 rounded-circle" title="View Function Points"
+                    (click)="viewSubActivities(activity.actId)">
+                     <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-primary rounded-circle" title="View File Details"
+                    (click)="viewFileDetails(activity.actId)">
+                    <i class="fas fa-file"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div *ngIf="filteredActivities.length === 0" class="text-center py-5 bg-light-blue rounded-3 mt-4 shadow-sm">
+          <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+          <p class="text-muted fs-5">No activities found for this project.</p>
+        </div>
+      </div>
+
+      <!-- Project Details Card -->
+      <div *ngIf="selectedProject && filteredActivities.length > 0" class="card mt-4 border-primary shadow-sm">
+        <div class="card-header bg-light-blue text-dark-blue">
+          <h6 class="mb-0"><i class="fas fa-project-diagram me-2"></i>Project Summary</h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <p class="d-flex justify-content-between border-bottom pb-2">
+                <strong class="text-dark-blue">Project ID:</strong> 
+                <span class="text-muted">{{ selectedProject.projId }}</span>
+              </p>
+              <p class="d-flex justify-content-between border-bottom pb-2">
+                <strong class="text-dark-blue">Project Name:</strong> 
+                <span class="text-muted">{{ selectedProject.projName }}</span>
+              </p>
+              <p class="d-flex justify-content-between border-bottom pb-2">
+                <strong class="text-dark-blue">Description:</strong> 
+                <span class="text-muted text-end" style="max-width: 200px;">{{ selectedProject.projDesc }}</span>
+              </p>
+            </div>
+            <div class="col-md-6">
+              <p class="d-flex justify-content-between border-bottom pb-2">
+                <strong class="text-dark-blue">Start Date:</strong> 
+                <span class="text-muted">{{ selectedProject.startDate | date: 'mediumDate' }}</span>
+              </p>
+              <p class="d-flex justify-content-between border-bottom pb-2">
+                <strong class="text-dark-blue">End Date:</strong> 
+                <span class="text-muted">{{ selectedProject.endDate | date: 'mediumDate' }}</span>
+              </p>
+              <p class="d-flex justify-content-between border-bottom pb-2">
+                <strong class="text-dark-blue">Active Activities:</strong> 
+                <span class="badge bg-success rounded-pill">
+                  {{ getActiveActivitiesCount() }} / {{ filteredActivities.length }}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Activity Detail Modal -->
+<div class="modal fade" id="activityDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-gradient-primary text-white">
+        <h5 class="modal-title">Activity Details: {{ selectedActivity?.actName }}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedActivity">
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <p class="d-flex justify-content-between border-bottom pb-2">
+              <strong class="text-dark-blue">Activity ID:</strong> 
+              <span class="text-muted">{{ selectedActivity.actId }}</span>
+            </p>
+            <p class="d-flex justify-content-between border-bottom pb-2">
+              <strong class="text-dark-blue">Name:</strong> 
+              <span class="text-muted">{{ selectedActivity.actName }}</span>
+            </p>
+            <p class="d-flex justify-content-between border-bottom pb-2">
+              <strong class="text-dark-blue">Status:</strong> 
+              <span class="badge rounded-pill p-2" [ngClass]="selectedActivity.status ? 'bg-success' : 'bg-secondary'">
+                {{ selectedActivity.status ? 'Active' : 'Inactive' }}
+              </span>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <p class="d-flex justify-content-between border-bottom pb-2">
+              <strong class="text-dark-blue">Project:</strong> 
+              <span class="text-muted">{{ selectedProject?.projName }}</span>
+            </p>
+            <p class="d-flex justify-content-between border-bottom pb-2">
+              <strong class="text-dark-blue">Project ID:</strong> 
+              <span class="text-muted">{{ selectedActivity.project?.projId }}</span>
+            </p>
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <p class="text-dark-blue fw-semibold">Description:</p>
+          <p class="p-3 bg-light-blue rounded-3">{{ selectedActivity.actDesc }}</p>
+        </div>
+        
+        <!-- Task Details Section -->
+        <div class="mb-4" *ngIf="activityTasks.length > 0">
+          <h6 class="border-bottom pb-2 text-dark-blue">Assigned Tasks</h6>
+          <div class="table-responsive rounded-3 shadow-sm">
+            <table class="table table-sm table-bordered">
+              <thead class="table-dark-blue text-white">
+                <tr>
+                  <th>User</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Due Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let task of activityTasks">
+                  <td>{{ task.user?.username || 'Unassigned' }}</td>
+                  <td>
+                    <span class="badge rounded-pill p-2" [ngClass]="{
+                      'bg-danger': task.priority === 1,
+                      'bg-warning text-dark': task.priority === 2,
+                      'bg-info': task.priority === 3
+                    }">
+                      {{ getPriorityText(task.priority) }}
+                    </span>
+                  </td>
+                  <td>{{ task.status?.sttStatus || 'Not Set' }}</td>
+                  <td>{{ task.starttime | date:'shortDate' }}</td>
+                  <td>{{ task.endtime | date:'shortDate' }}</td>
+                  <td>{{ task.dueDate | date:'shortDate' }}</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-info me-1 rounded-circle" title="View Function Points"
+                      (click)="viewSubActivities(task.activity.actId)">
+                       <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary rounded-circle" title="View File Details"
+                      (click)="viewFileDetails(task.activity.actId)">
+                      <i class="fas fa-file"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div *ngIf="activityTasks.length === 0" class="alert alert-warning rounded-3">
+          <i class="fas fa-exclamation-triangle me-2"></i>No tasks assigned to this activity.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SubActivity Modal -->
+<div class="modal fade" id="subActivityModal" tabindex="-1" aria-labelledby="subActivityModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="subActivityModalLabel">
+          <i class="fas fa-list me-2"></i>Function Points for Activity ID: {{ selectedActivityId }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Performance Dashboard -->
+        <div class="performance-dashboard" *ngIf="performanceData">
+          <div class="circular-progress" [style.--percentage]="performanceData.weightagePercentage">
+            <svg>
+              <circle r="45" cx="50" cy="50"></circle>
+              <circle r="45" cx="50" cy="50" 
+                  [style.stroke]="getProgressColor(performanceData.weightagePercentage)"></circle>
+            </svg>
+            <div class="progress-text">
+              <div class="progress-value">{{ performanceData.weightagePercentage }}%</div>
+              <div class="progress-label">Completed</div>
+            </div>
+          </div>
+          
+          <div class="stats-container">
+            <div class="stat-box">
+              <div class="stat-value">{{ performanceData.totalSubActivities }}</div>
+              <div class="stat-label">Total Function Points</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">{{ performanceData.completedSubActivities }}</div>
+              <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">{{ performanceData.totalSubActivities - performanceData.completedSubActivities }}</div>
+              <div class="stat-label">Pending</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add SubActivity Button -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="mb-0">Function Points List</h6>
+          <button class="btn btn-sm btn-success" (click)="showSubActivityForm()">
+            <i class="fas fa-plus-circle me-1"></i>Add Function Points
+          </button>
+        </div>
+
+        <!-- SubActivity Form -->
+        <div class="subactivity-form-container" *ngIf="showSubActivityFormFlag">
+          <h6 class="mb-3"><i class="fas fa-plus-circle me-2"></i>{{ selectedSubActivity ? 'Edit Function Point' : 'Create New Function Point' }}</h6>
+          <form [formGroup]="subActivityForm" (ngSubmit)="submitSubActivityForm()">
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label class="form-label small text-muted">Function Point Name</label>
+                <input type="text" class="form-control" formControlName="subActName" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Description</label>
+                <input type="text" class="form-control" formControlName="subActDesc">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small text-muted">Status</label>
+                <select class="form-select" formControlName="status">
+                  <option value="PENDING">Pending</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="COMPLETED">Completed</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small text-muted">Start Date</label>
+                <input type="datetime-local" class="form-control" formControlName="startDate">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small text-muted">End Date</label>
+                <input type="datetime-local" class="form-control" formControlName="endDate">
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col-12 d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-primary btn-sm">
+                  <i class="fas fa-save me-1"></i>{{ selectedSubActivity ? 'Update' : 'Create' }}
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelSubActivityForm()">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- SubActivities Table -->
+        <div *ngIf="subActivities.length === 0 && !showSubActivityFormFlag" class="text-center py-4">
+          <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+          <p class="text-muted">No function points found for this activity.</p>
+        </div>
+        
+        <div *ngIf="subActivities.length > 0" class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th class="fw-bold">ID</th>
+                <th class="fw-bold">Function Point Name</th>
+                <th class="fw-bold">Description</th>
+                <th class="fw-bold">Status</th>
+                <th class="fw-bold">Start Date</th>
+                <th class="fw-bold">End Date</th>
+                <th class="fw-bold">Created By</th>
+                <th class="fw-bold">Created At</th>
+                <th class="fw-bold text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let subActivity of subActivities" (dblclick)="onEditSubActivity(subActivity)" class="cursor-pointer">
+                <td class="text-muted">{{ subActivity.subActId }}</td>
+                <td class="fw-semibold">{{ subActivity.subActName }}</td>
+                <td>{{ subActivity.subActDesc }}</td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'bg-secondary': subActivity.status === 'PENDING',
+                    'bg-warning': subActivity.status === 'IN_PROGRESS',
+                    'bg-success': subActivity.status === 'COMPLETED'
+                  }">
+                    {{ subActivity.status }}
+                  </span>
+                </td>
+                <td>{{ formatDate(subActivity.startDate) }}</td>
+                <td>{{ formatDate(subActivity.endDate) }}</td>
+                <td>{{ subActivity.createdBy }}</td>
+                <td>{{ formatDate(subActivity.createdAt) }}</td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-outline-danger" 
+                          (click)="deleteSubActivity(subActivity.subActId)">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

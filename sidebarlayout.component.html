@@ -1,0 +1,120 @@
+<div class="d-flex">
+  <!-- Sidebar -->
+  <nav [ngClass]="{ 'sidebar-expanded': sidebarOpen, 'sidebar-collapsed': !sidebarOpen }" class="sidebar bg-dark text-white p-3">
+    <!-- Toggle Icon -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 *ngIf="sidebarOpen && isLoggedIn">STT</h4>
+      <button class="btn btn-sm btn-outline-light toggle-btn" (click)="toggleSidebar()">
+        <i class="bi" [ngClass]="sidebarOpen ? 'bi-chevron-left' : 'bi-chevron-right'"></i>
+      </button>
+    </div>
+
+    <!-- Sidebar Links -->
+    <ul class="nav flex-column">
+      <!-- User Dashboard -->
+      <li class="nav-item" *ngIf="isLoggedIn && isUser">
+        <a class="nav-link text-white" routerLink="/user">
+          <i class="bi bi-house-door me-2"></i>
+          <span *ngIf="sidebarOpen">Dashboard</span>
+        </a>
+      </li>
+
+      <!-- Admin Dashboard -->
+      <li class="nav-item" *ngIf="isLoggedIn && isAdmin">
+        <a class="nav-link text-white" routerLink="/admin/adminDashboard">
+          <i class="bi bi-speedometer2 me-2"></i>
+          <span *ngIf="sidebarOpen">Dashboard</span>
+        </a>
+      </li>
+
+      <!-- Manager Dashboard -->
+      <li class="nav-item" *ngIf="isLoggedIn && isManager">
+        <a class="nav-link text-white" routerLink="/manager/dashboard">
+          <i class="bi bi-columns-gap me-2"></i>
+          <span *ngIf="sidebarOpen">Dashboard</span>
+        </a>
+      </li>
+
+      <!-- Masters Section -->
+      <li *ngIf="isLoggedIn && (isAdmin || isManager || isUser)" class="mt-2">
+        <span class="text-white fw-bold">Masters</span>
+        <ul class="nav flex-column ms-2 mt-1">
+          <!-- Employee Master - Only Admin/Manager -->
+          <li *ngIf="isAdmin || isManager">
+            <a class="nav-link text-white" [routerLink]="isAdmin ? '/admin/listemployee' : '/manager/listemployee'">
+              <i class="bi bi-person me-2"></i>
+              <span *ngIf="sidebarOpen">Employee Master</span>
+            </a>
+          </li>
+
+          <!-- Project Master - Only Admin/Manager -->
+          <li *ngIf="isAdmin || isManager">
+            <a class="nav-link text-white" [routerLink]="isAdmin ? '/admin/listproject' : '/manager/listproject'">
+              <i class="bi bi-briefcase me-2"></i>
+              <span *ngIf="sidebarOpen">Project Master</span>
+            </a>
+          </li>
+
+          <!-- Activity Master - Visible to All -->
+          <!-- <li>
+            <a class="nav-link text-white"
+               [routerLink]="isAdmin ? '/admin/listactivity' :  '/manager/listactivity'">
+              <i class="bi bi-briefcase me-2"></i>
+              <span *ngIf="sidebarOpen">Activity Master</span>
+            </a>
+          </li> -->
+ <li *ngIf="isAdmin || isManager">
+            <a class="nav-link text-white" [routerLink]="isAdmin ? '/admin/listactivity' : '/manager/listactivity'">
+              <i class="bi bi-briefcase me-2"></i>
+              <span *ngIf="sidebarOpen">Activity Master</span>
+            </a>
+          </li>
+          <!-- Reports - Only Admin/Manager -->
+          <li *ngIf="isAdmin || isManager">
+            <a class="nav-link text-white" [routerLink]="isAdmin ? '/admin/reports' : '/manager/reports'">
+              <i class="bi bi-bar-chart me-2"></i>
+              <span *ngIf="sidebarOpen">Reports</span>
+            </a>
+          </li>
+
+          <!-- Add Employee - Only Admin/Manager -->
+          <li *ngIf="isAdmin || isManager">
+            <a class="nav-link text-white" [routerLink]="isAdmin ? '/admin/registration' : '/manager/registration'">
+              <i class="bi bi-arrow-right-circle me-2"></i>
+              <span *ngIf="sidebarOpen">Add Employee</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      <!-- Login -->
+      <li class="nav-item mt-4" *ngIf="!isLoggedIn">
+        <a class="nav-link text-white" routerLink="/">
+          <i class="bi bi-box-arrow-in-right me-2"></i>
+          <span *ngIf="sidebarOpen">Login</span>
+        </a>
+      </li>
+
+      <!-- Profile -->
+      <li class="nav-item mt-2" *ngIf="isLoggedIn">
+        <a class="nav-link text-white" [routerLink]="isAdmin ? '/admin/profile' : (isManager ? '/manager/profile' : '/user/profile')">
+          <i class="bi bi-person-circle me-2"></i>
+          <span *ngIf="sidebarOpen">{{ username }}</span>
+        </a>
+      </li>
+
+      <!-- Logout -->
+      <li class="nav-item mt-2" *ngIf="isLoggedIn">
+        <a class="nav-link text-white" href="#" (click)="logout()">
+          <i class="bi bi-box-arrow-right me-2"></i>
+          <span *ngIf="sidebarOpen">Logout</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="flex-grow-1 p-3">
+    <router-outlet></router-outlet>
+  </div>
+</div>

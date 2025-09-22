@@ -1,0 +1,20 @@
+ .cursor-pointer { cursor: pointer; }
+        .bg-light-primary { background-color: #e3f2fd; }
+        .table-hover tbody tr:hover { background-color: #f8f9fa; }
+        .table th { border-top: none; border-bottom: 2px solid #dee2e6; }
+        .table td { border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+        .card { border-radius: 0.75rem; }
+        .form-control:focus, .form-select:focus { box-shadow: none; border-color: #86b7fe; }
+        .badge { font-size: 0.85em; }
+        .subactivity-form-container { 
+            background-color: #f8f9fa; 
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .table-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }

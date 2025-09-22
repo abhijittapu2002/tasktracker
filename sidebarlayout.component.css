@@ -1,0 +1,49 @@
+
+   /* Base sidebar styles */
+.sidebar {
+    height: 100vh;
+    transition: width 0.3s ease;
+    overflow-x: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+  }
+  
+  /* Expanded Sidebar */
+  .sidebar-expanded {
+    width: 222px;
+  }
+  
+  /* Collapsed Sidebar */
+  .sidebar-collapsed {
+    width: 60px;
+  }
+  
+  /* Main Content should shift accordingly */
+  .flex-grow-1 {
+    margin-left: 220px;
+    transition: margin-left 0.3s ease;
+  }
+  
+  /* Shift content when sidebar is collapsed */
+  .sidebar-collapsed + .flex-grow-1 {
+    margin-left: 60px !important;
+  }
+  
+  /* Adjust spacing of icons/text */
+  .sidebar .nav-link i {
+    font-size: 18px;
+  }
+  
+  /* Hide overflowing text in collapsed mode */
+  .sidebar-collapsed .nav-link span {
+    display: none;
+  }
+  
+  /* Optional: Tooltip for collapsed items */
+  .sidebar-collapsed .nav-link {
+    white-space: nowrap;
+  }
+  
+  

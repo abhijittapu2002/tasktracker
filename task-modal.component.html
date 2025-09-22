@@ -1,0 +1,135 @@
+<!-- task-modal.component.html -->
+<div class="modal-header">
+  <h5 class="modal-title">{{ task?.id ? 'Update Task' : 'Allocate Task' }}</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close()"></button>
+</div>
+
+<div class="modal-body">
+  <form (ngSubmit)="onSubmit()">
+    
+   <!-- Allocate To - Only show for admin, not for user dashboard -->
+<div class="form-group" *ngIf="!isUserDashboard">
+  <label for="userId">Allocate to:</label>
+  <select id="userId" class="form-select" 
+          [(ngModel)]="task.userId" 
+          name="userId" 
+          required
+          [disabled]="isEditing && isUserDashboard">
+    <option value="" disabled>User name</option>
+    <option *ngFor="let user of userIdList" [value]="user.userId">
+      {{ user.username }}
+    </option>
+  </select>
+</div>
+
+
+    <!-- Show allocated user info for user dashboard -->
+    <div class="form-group" *ngIf="isUserDashboard">
+      <label>Allocated to:</label>
+      <p class="form-control-static"><strong>Yourself</strong></p>
+      <input type="hidden" [(ngModel)]="task.userId" name="userId" />
+    </div>
+
+    <!-- Project - Disabled for user when editing -->
+    <div class="form-group">
+      <label for="project">Project:</label>
+      <select id="project" class="form-select"
+              [(ngModel)]="task.projId" 
+              name="projId" 
+              (change)="filterActivitiesByProject()" 
+              required
+              [disabled]="isEditing && isUserDashboard">
+        <option value="" disabled>Select Project</option>
+        <option *ngFor="let project of projectList" [value]="project.projId">
+          {{ project.projName }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Activity - Disabled for user when editing -->
+    <div class="form-group">
+      <label for="activity">Activity:</label>
+      <select id="activity" class="form-select"
+              [(ngModel)]="task.actId"
+              name="actId"
+              required
+              (change)="fetchActivityDetails()"
+              [disabled]="isEditing && isUserDashboard">
+        <option value="" disabled>Select Activity</option>
+        <option *ngFor="let activity of filteredActivities" [value]="activity.actId">
+          {{ activity.actName }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Start Time - Disabled for user when editing -->
+    <div class="form-group" *ngIf="!isEditing">
+      <label for="starttime">Planned Start Date:</label>
+      <input type="datetime-local" id="starttime" class="form-control" 
+             [(ngModel)]="task.starttime" name="starttime" required
+             [disabled]="isEditing && isUserDashboard" />
+    </div>
+
+    <!-- End Time - Disabled for user when editing -->
+    <div class="form-group">
+      <label for="endtime">Planned End Date:</label>
+      <input type="datetime-local" id="endtime" class="form-control" 
+             [(ngModel)]="task.endtime" name="endtime" required
+             [disabled]="isEditing && isUserDashboard" />
+    </div>
+
+    <!-- Due Date - Disabled for user when editing -->
+    <div class="form-group">
+      <label for="dueDate">Due Date:</label>
+      <input type="datetime-local" id="dueDate" class="form-control" 
+             [(ngModel)]="task.dueDate" name="dueDate" required
+             [disabled]="isEditing && isUserDashboard" />
+    </div>
+
+   <!-- Status - Always enabled -->
+<div class="form-group">
+  <label for="statusId">Status:</label>
+  <select id="statusId" class="form-select" 
+          [(ngModel)]="task.statusId" 
+          name="statusId" 
+          required>
+    <option value="" disabled>Status</option>
+    <option *ngFor="let status of statusList" [value]="status.statusId">
+      {{ status.sttStatus }}
+    </option>
+  </select>
+</div>
+
+<!-- Priority - Disabled for user when editing -->
+<div class="form-group">
+  <label for="priority">Priority:</label>
+  <select id="priority" class="form-select" 
+          [(ngModel)]="task.priority" 
+          name="priority" 
+          required
+          [disabled]="isEditing && isUserDashboard">
+    <option *ngFor="let p of [1, 2, 3]" [value]="p">{{ p }}</option>
+  </select>
+</div>
+
+
+    <!-- Important - Disabled for user when editing -->
+    <div class="form-group form-check">
+      <input type="checkbox" id="important" class="form-check-input" 
+             [(ngModel)]="task.important" name="important"
+             [disabled]="isEditing && isUserDashboard" />
+      <label class="form-check-label" for="important">Important</label>
+    </div>
+
+    <!-- Upload Document - Always enabled -->
+    <div class="form-group">
+      <label for="document">Upload Document:</label>
+      <input type="file" id="document" class="form-control" (change)="onFileSelected($event)" />
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="btn btn-primary mt-2">
+      {{ task?.id ? 'Save Changes' : 'Allocate Task' }}
+    </button>
+  </form>
+</div>

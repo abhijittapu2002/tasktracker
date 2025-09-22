@@ -1,0 +1,23 @@
+.remarks-chat-container {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.chat-bubble {
+  background-color: #f1f1f1;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+}
+
+.bubble-header {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.bubble-body {
+  font-size: 1rem;
+  color: #000;
+}

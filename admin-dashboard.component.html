@@ -1,0 +1,447 @@
+<!-- admin.component.html -->
+<h5>Welcome to Admin Dashboard</h5>
+<div class="container" [attr.inert]="isModalOpen ? true : null">
+
+  <div class="container">
+    <!-- Add navigation buttons at the top -->
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <div class="d-flex align-items-center">
+          <strong class="me-2">Select User:</strong>
+          <select class="form-select me-2" style="width: auto;" [(ngModel)]="selectedEmployee" (ngModelChange)="loadTasks()">
+            <option *ngIf="isAdmin" [ngValue]="null">All Users</option>
+            <option *ngFor="let emp of _EmpList" [ngValue]="emp.username">{{ emp.username }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-6 text-end">
+        <!-- Kanban View Button -->
+        <!-- Replace the routerLink with a click handler -->
+<button class="btn btn-primary me-2" (click)="navigateToKanbanView()">
+  <i class="fa fa-columns me-1"></i> Kanban View
+</button>
+        
+        <button class="btn btn-success" (click)="openModal()">
+          <i class="fa fa-plus me-1"></i> Allocate Task
+        </button>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead>
+        
+          <tr
+            *ngIf="!selectedCategory || selectedCategory === 'importantUrgent' || selectedCategory === 'importantNotUrgent'">
+            <th *ngIf="!selectedCategory || selectedCategory === 'importantUrgent'" style="background-color: red;">
+              Important and Urgent
+              <i class="fa fa-eye float-end" style="cursor: pointer;" (click)="toggleCategoryView('importantUrgent')"
+                title="View Details"></i>
+            </th>
+            <th *ngIf="!selectedCategory || selectedCategory === 'importantNotUrgent'"
+              style="background-color: orange;">
+              Important but Not Urgent
+              <i class="fa fa-eye float-end" style="cursor: pointer;" (click)="toggleCategoryView('importantNotUrgent')"
+                title="View Details"></i>
+            </th>
+          </tr>
+
+
+        </thead>
+        <tbody>
+          <tr>
+            <!-- Important & Urgent -->
+            <td *ngIf="!selectedCategory || selectedCategory === 'importantUrgent'">
+
+              <div class="table-responsive">
+                <table class="table" style="width: 100%; margin-bottom: 40px;">
+                  <thead>
+                    <tr style="background-color: lightgray;">
+                      <th>Sl.No</th>
+                      <th>Project</th>
+                      <th>Activity</th>
+                      <th *ngIf="selectedCategory === 'importantUrgent'">End Date</th>
+                       <th *ngIf="selectedCategory === 'importantUrgent'">Priority</th>
+                      <th>Status</th>
+                      <th>Due Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of importantUrgent; let i = index" class="blue-background"
+                      (dblclick)="onTaskDoubleClick(item)">
+                      <td>{{ getSerialNumber(i, 'importantUrgent') }}</td>
+                      <td>{{ item.activity?.project?.projName }}</td>
+                      <td>{{ item.activity?.actName }}</td>
+                      <td *ngIf="selectedCategory === 'importantUrgent'">{{ item.endtime | date }}</td>
+                       <td *ngIf="selectedCategory === 'importantUrgent'">{{ item.priority  }}</td>
+                      <td>{{ item.status?.sttStatus }}</td>
+                      <td>{{ item?.dueDate}}</td>
+                      <td>
+                        <div class="d-flex align-items-center gap-2">
+                          <!-- View SubActivities Icon -->
+                          <button class="btn btn-outline-info btn-sm" title="View Function Points"
+                            (click)="viewSubActivities(item.activity.actId)">
+                             <i class="fas fa-eye"></i>
+                          </button>
+                         
+                          <!-- View Remarks Icon -->
+                          <button class="btn btn-outline-success btn-sm" title="View Remarks"
+                            (click)="viewRemarks(item.activity.actId)">
+                            <i class="fa fa-comment"></i>
+                          </button>
+
+                          <!-- File Details Icon -->
+                          <button class="btn btn-outline-primary btn-sm" title="View File Details"
+                            (click)="viewFileDetails(item.activity.actId)">
+                            <i class="fa fa-file"></i>
+                          </button>
+                        </div>
+                      </td>
+
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+
+            <!-- Important but Not Urgent -->
+            <td *ngIf="!selectedCategory || selectedCategory === 'importantNotUrgent'">
+
+              <div class="table-responsive">
+                <table class="table" style="width: 100%; margin-bottom: 20px;">
+                  <thead>
+                    <tr style="background-color: lightgray;">
+                      <th>Sl.No</th>
+                      <th>Project</th>
+                      <th>Activity</th>
+                      <th *ngIf="selectedCategory === 'importantNotUrgent'">End Date</th>
+                      <th *ngIf="selectedCategory === 'importantNotUrgent'">Priority</th>
+                      <th>Status</th>
+                      <th>Due Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of importantNotUrgent; let i = index" class="blue-background"
+                      (dblclick)="onTaskDoubleClick(item)">
+                      <td>{{ getSerialNumber(i, 'importantNotUrgent') }}</td>
+                      <td>{{ item.activity?.project?.projName }}</td>
+                      <td>{{ item.activity?.actName }}</td>
+                      <td *ngIf="selectedCategory === 'importantNotUrgent'">{{ item.endtime | date }}</td>
+                      <td *ngIf="selectedCategory === 'importantNotUrgent'">{{ item.priority  }}</td>
+                      <td>{{ item.status?.sttStatus }}</td>
+                      <td>{{ item?.dueDate}}</td>
+                      <td>
+                        <div class="d-flex align-items-center gap-2">
+                          <!-- View SubActivities Icon -->
+                          <button class="btn btn-outline-info btn-sm" title="View Function Points"
+                            (click)="viewSubActivities(item.activity.actId)">
+                             <i class="fas fa-eye"></i>
+                          </button>
+
+                        <!-- View Remarks Icon -->
+                          <button class="btn btn-outline-success btn-sm" title="View Remarks"
+                            (click)="viewRemarks(item.activity.actId)">
+                            <i class="fa fa-comment"></i>
+                          </button>
+
+                          <!-- File Details Icon -->
+                          <button class="btn btn-outline-primary btn-sm" title="View File Details"
+                            (click)="viewFileDetails(item.activity.actId)">
+                            <i class="fa fa-file"></i>
+                          </button>
+                        </div>
+                      </td>
+
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+
+         
+          <tr
+            *ngIf="!selectedCategory || selectedCategory === 'notImportantUrgent' || selectedCategory === 'notImportantNotUrgent'"
+            style="background-color: blueviolet;">
+            <th *ngIf="!selectedCategory || selectedCategory === 'notImportantUrgent'"
+              style="background-color: greenyellow;">
+              Not Important but Urgent
+              <i class="fa fa-eye float-end" style="cursor: pointer;" (click)="toggleCategoryView('notImportantUrgent')"
+                title="View Details"></i>
+            </th>
+            <th *ngIf="!selectedCategory || selectedCategory === 'notImportantNotUrgent'"
+              style="background-color: green;">
+              Not Important and Not Urgent
+              <i class="fa fa-eye float-end" style="cursor: pointer;"
+                (click)="toggleCategoryView('notImportantNotUrgent')" title="View Details"></i>
+            </th>
+          </tr>
+
+
+
+          <tr>
+            <!-- Not Important but Urgent -->
+            <td *ngIf="!selectedCategory || selectedCategory === 'notImportantUrgent'">
+
+              <div class="table-responsive">
+                <table class="table" style="width: 100%; margin-bottom: 30px;">
+                  <thead>
+                    <tr style="background-color: lightgray;">
+                      <th>Sl.No</th>
+                      <th>Project</th>
+                      <th>Activity</th>
+                      <th *ngIf="selectedCategory === 'notImportantUrgent'">End Date</th>
+                       <th *ngIf="selectedCategory === 'notImportantUrgent'">Priority</th>
+                      <th>Status</th>
+                      <th>Due Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of notImportantUrgent; let i = index" class="blue-background"
+                      (dblclick)="onTaskDoubleClick(item)">
+                      <td>{{ getSerialNumber(i, 'notImportantUrgent') }}</td>
+                      <td>{{ item.activity?.project?.projName }}</td>
+                      <td>{{ item.activity?.actName }}</td>
+                      <td *ngIf="selectedCategory === 'notImportantUrgent'">{{ item.endtime | date }}</td>
+                       <td *ngIf="selectedCategory === 'notImportantUrgent'">{{ item.priority  }}</td>
+                      <td>{{ item.status?.sttStatus }}</td>
+                      <td>{{item?.dueDate}}</td>
+                      <td>
+                        <div class="d-flex align-items-center gap-2">
+                          <!-- View SubActivities Icon -->
+                          <button class="btn btn-outline-info btn-sm" title="View Function Points"
+                            (click)="viewSubActivities(item.activity.actId)">
+                             <i class="fas fa-eye"></i>
+                          </button>
+
+                        <!-- View Remarks Icon -->
+                          <button class="btn btn-outline-success btn-sm" title="View Remarks"
+                            (click)="viewRemarks(item.activity.actId)">
+                            <i class="fa fa-comment"></i>
+                          </button>
+
+                          <!-- File Details Icon -->
+                          <button class="btn btn-outline-primary btn-sm" title="View File Details"
+                            (click)="viewFileDetails(item.activity.actId)">
+                            <i class="fa fa-file"></i>
+                          </button>
+                        </div>
+                      </td>
+
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+
+            <!-- Not Important and Not Urgent -->
+            <td *ngIf="!selectedCategory || selectedCategory === 'notImportantNotUrgent'">
+
+              <div class="table-responsive">
+                <table class="table" style="width: 100%;">
+                  <thead>
+                    <tr style="background-color: lightgray;">
+                      <th>Sl.No</th>
+                      <th>Project</th>
+                      <th>Activity</th>
+                      <th *ngIf="selectedCategory === 'notImportantNotUrgent'">End Date</th>
+                      <th *ngIf="selectedCategory === 'notImportantNotUrgent'">Priority</th>
+                      <th>Status</th>
+                      <th>Due Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of notImportantNotUrgent; let i = index" class="blue-background"
+                      (dblclick)="onTaskDoubleClick(item)">
+                      <td>{{ getSerialNumber(i, 'notImportantNotUrgent') }}</td>
+                      <td>{{ item.activity?.project?.projName }}</td>
+                      <td>{{ item.activity?.actName }}</td>
+                      <td *ngIf="selectedCategory === 'notImportantNotUrgent'">{{ item.endtime | date }}</td>
+                      <td *ngIf="selectedCategory === 'notImportantNotUrgent'">{{ item.priority  }}</td>
+                      <td>{{ item.status?.sttStatus }}</td>
+                      <td>{{item?.dueDate}}</td>
+                      <td>
+                        <div class="d-flex align-items-center gap-2">
+                          <!-- View SubActivities Icon -->
+                          <button class="btn btn-outline-info btn-sm" title="View Function Points"
+                            (click)="viewSubActivities(item.activity.actId)">
+                             <i class="fas fa-eye"></i>
+                          </button>
+
+                        <!-- View Remarks Icon -->
+                          <button class="btn btn-outline-success btn-sm" title="View Remarks"
+                            (click)="viewRemarks(item.activity.actId)">
+                            <i class="fa fa-comment"></i>
+                          </button>
+
+                          <!-- File Details Icon -->
+                          <button class="btn btn-outline-primary btn-sm" title="View File Details"
+                            (click)="viewFileDetails(item.activity.actId)">
+                            <i class="fa fa-file"></i>
+                          </button>
+                        </div>
+                      </td>
+
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SubActivity Modal -->
+<div class="modal fade" id="subActivityModal" tabindex="-1" aria-labelledby="subActivityModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="subActivityModalLabel">
+          <i class="fas fa-list me-2"></i>Function Points for Activity ID: {{ selectedActivityId }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Add SubActivity Button -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="mb-0">Function Point List</h6>
+          <!-- Performance Dashboard -->
+          <div class="performance-dashboard" *ngIf="performanceData">
+            <div class="circular-progress" [style.--percentage]="performanceData.weightagePercentage">
+              <svg>
+                <circle r="45" cx="50" cy="50"></circle>
+                <circle r="45" cx="50" cy="50" 
+                        [style.stroke]="getProgressColor(performanceData.weightagePercentage)"></circle>
+              </svg>
+              <div class="progress-text">
+                <div class="progress-value">{{ performanceData.weightagePercentage }}%</div>
+                <div class="progress-label">Completed</div>
+              </div>
+            </div>
+            
+            <div class="stats-container">
+              <div class="stat-box">
+                <div class="stat-value">{{ performanceData.totalSubActivities }}</div>
+                <div class="stat-label">Total Function Points</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-value">{{ performanceData.completedSubActivities }}</div>
+                <div class="stat-label">Completed</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-value">{{ performanceData.totalSubActivities - performanceData.completedSubActivities }}</div>
+                <div class="stat-label">Pending</div>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-sm btn-success" (click)="showSubActivityForm()">
+            <i class="fas fa-plus-circle me-1"></i>Add Function Point
+          </button>
+        </div>
+
+        <!-- SubActivity Form -->
+        <div class="subactivity-form-container" *ngIf="showSubActivityFormFlag">
+          <h6 class="mb-3"><i class="fas fa-plus-circle me-2"></i>{{ selectedSubActivity ? 'Edit Function Point' : 'Create New Function Point' }}</h6>
+          <form [formGroup]="subActivityForm" (ngSubmit)="submitSubActivityForm()">
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label class="form-label small text-muted">Function Point Name</label>
+                <input type="text" class="form-control" formControlName="subActName" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Description</label>
+                <input type="text" class="form-control" formControlName="subActDesc">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small text-muted">Status</label>
+                <select class="form-select" formControlName="status">
+                  <option value="PENDING">Pending</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="COMPLETED">Completed</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small text-muted">Start Date</label>
+                <input type="datetime-local" class="form-control" formControlName="startDate">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small text-muted">End Date</label>
+                <input type="datetime-local" class="form-control" formControlName="endDate">
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col-12 d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-primary btn-sm">
+                  <i class="fas fa-save me-1"></i>{{ selectedSubActivity ? 'Update' : 'Create' }}
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelSubActivityForm()">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- SubActivities Table -->
+        <div *ngIf="subActivities.length === 0 && !showSubActivityFormFlag" class="text-center py-4">
+          <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+          <p class="text-muted">No Function Points found for this activity.</p>
+        </div>
+        
+        <div *ngIf="subActivities.length > 0" class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th class="fw-bold">ID</th>
+                <th class="fw-bold">Function Point Name</th>
+                <th class="fw-bold">Description</th>
+                <th class="fw-bold">Status</th>
+                <th class="fw-bold">Start Date</th>
+                <th class="fw-bold">End Date</th>
+                <th class="fw-bold">Created By</th>
+                <th class="fw-bold">Created At</th>
+                <th class="fw-bold text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let subActivity of subActivities" (dblclick)="onEditSubActivity(subActivity)" class="cursor-pointer">
+                <td class="text-muted">{{ subActivity.subActId }}</td>
+                <td class="fw-semibold">{{ subActivity.subActName }}</td>
+                <td>{{ subActivity.subActDesc }}</td>
+                <td>
+                  <span class="badge" 
+                        [ngClass]="{
+                          'bg-secondary': subActivity.status === 'PENDING',
+                          'bg-warning': subActivity.status === 'IN_PROGRESS',
+                          'bg-success': subActivity.status === 'COMPLETED'
+                        }">
+                    {{ subActivity.status }}
+                  </span>
+                </td>
+                <td>{{ formatDate(subActivity.startDate) }}</td>
+                <td>{{ formatDate(subActivity.endDate) }}</td>
+                <td>{{ subActivity.createdBy }}</td>
+                <td>{{ formatDate(subActivity.createdAt) }}</td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-outline-danger" 
+                          (click)="deleteSubActivity(subActivity.subActId)">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,76 @@
+<div class="container">
+    <div class="header">
+        <div class="employee-icon">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+            </svg>
+            <h1 style="font-size: 1.8rem; margin: 0;">Employee Directory</h1>
+        </div>
+        <button class="btn-add" (click)="goToAddEmployee()">
+            <svg style="width: 18px; height: 18px; fill: white;" viewBox="0 0 24 24">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            Add Employee
+        </button>
+    </div>
+
+    <!-- Update Form -->
+    <div *ngIf="selectedEmployee" class="edit-form">
+        <h3>Edit Employee</h3>
+        <form (ngSubmit)="updateEmployee()">
+            <input type="text" [(ngModel)]="selectedEmployee.username" name="username" placeholder="Name" required />
+            <input type="email" [(ngModel)]="selectedEmployee.email" name="email" placeholder="Email" required />
+            <select [(ngModel)]="selectedEmployee.role" name="role" required>
+                <option value="" disabled>Select Role</option>
+                <option value="ADMIN">ADMIN</option>
+                <option value="USER">USER</option>
+                <option value="MANAGER">MANAGER</option>
+            </select>
+            <button type="submit" class="btn-update">Update</button>
+            <button type="button" class="btn-cancel" (click)="cancelEdit()">Cancel</button>
+        </form>
+    </div>
+
+    <!-- Employee Table -->
+    <div class="table-container">
+        <div *ngIf="employees.length === 0" class="empty-state">
+            <svg style="width: 24px; height: 24px; fill: #dc3545;" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            No employees found or access denied.
+        </div>
+
+        <table *ngIf="employees.length > 0">
+            <thead>
+                <tr>
+                    <th>Emp.ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let emp of employees; let i = index" (dblclick)="onRowDoubleClick(emp)">
+                    <td style="font-weight: 500; color: #2c3e50;">#{{i + 1}}</td>
+                    <td>
+                        <svg style="width: 20px; height: 20px; fill: #4a90e2; margin-right: 10px; vertical-align: middle;" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        {{ emp.username }}
+                    </td>
+                    <td style="color: #1976d2;">{{ emp.email }}</td>
+                    <td><span class="role-badge">{{ emp.role }}</span></td>
+                    <td>
+                        <button class="btn-delete" (click)="confirmDelete(emp.userId)">
+  <svg viewBox="0 0 24 24">
+    <path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-4.5l-1-1z"/>
+  </svg>
+</button>
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

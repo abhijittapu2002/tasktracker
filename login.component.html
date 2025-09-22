@@ -1,0 +1,54 @@
+
+<!-- Bootstrap CSS -->
+
+<div class="container d-flex justify-content-center align-items-center vh-100">
+  <div class="card shadow p-4" style="width: 350px;">
+    <h2 class="text-center">Login</h2>
+
+    <p *ngIf="errorMessage" class="alert alert-danger text-center">{{ errorMessage }}</p>
+
+    <form (ngSubmit)="onSubmit()">
+      <!-- Username Field -->
+      <div class="mb-3 position-relative">
+  <label for="username" class="form-label">Username:</label>
+  <input type="text" 
+         id="username" 
+         [(ngModel)]="loginData.username" 
+         name="username" 
+         class="form-control pe-5" 
+         required>
+
+        <!-- <i class="bi" 
+           [ngClass]="showUsername ? 'bi-eye-slash' : 'bi-eye'" 
+           (click)="showUsername = !showUsername"
+           style="position: absolute; top: 38px; right: 15px; cursor: pointer;"></i> -->
+      </div>
+
+      <!-- Password Field -->
+      <div class="mb-3 position-relative">
+        <label for="password" class="form-label">Password:</label>
+        <input [type]="showPassword ? 'text' : 'password'" 
+               id="password" 
+               [(ngModel)]="loginData.password" 
+               name="password" 
+               class="form-control pe-5" required>
+
+        <i class="bi" 
+           [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'" 
+           (click)="showPassword = !showPassword"
+           style="position: absolute; top: 38px; right: 15px; cursor: pointer;"></i>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Login</button>
+    </form>
+
+    <p class="text-center mt-3">
+      <a [routerLink]="['/reset-password']" class="text-primary">Forgot Password?</a>
+    </p>
+
+    <!-- Optional Sign Up -->
+    <!-- <p class="text-center mt-3">Don't have an account? 
+      <a [routerLink]="['/register']" class="text-primary">Sign Up Here</a>
+    </p> -->
+  </div>
+</div>

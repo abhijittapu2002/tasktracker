@@ -1,0 +1,80 @@
+.performance-dashboard {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.circular-progress {
+  position: relative;
+  height: 100px;
+  width: 100px;
+}
+
+.circular-progress svg {
+  height: 100px;
+  width: 100px;
+  transform: rotate(-90deg);
+}
+
+.circular-progress circle {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.circular-progress circle:first-child {
+  stroke: #e6e6e6;
+}
+
+.circular-progress circle:last-child {
+  stroke-dasharray: 283;
+  stroke-dashoffset: calc(283 - (var(--percentage) * 283 / 100));
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.progress-value {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.progress-label {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.stats-container {
+  display: flex;
+  gap: 15px;
+}
+
+.stat-box {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  text-align: center;
+  min-width: 120px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #6c757d;
+}
